@@ -1,0 +1,21 @@
+- name: Install tools
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Update apt repository cache for EC2
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+    - name: Install dependencies
+      apt:
+        name:
+          - git
+        state: present
+      when: ansible_os_family == "Debian"
+
+  roles:
+    - amass
+    - theharvester
+    - subfinder
+    - shodan_cli
+    - gitdorker

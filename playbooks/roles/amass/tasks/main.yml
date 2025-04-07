@@ -1,0 +1,26 @@
+---
+- name: Check if amass is already installed
+  stat:
+    path: /snap/bin/amass
+  register: amass_installed
+
+- name: Install Amass via snap for Ubuntu
+  become: true
+  when: amass_installed.stat.exists == false
+  command: snap install amass
+
+- name: Check if Amass is installed via Homebrew for macOS
+  stat:
+    path: /opt/homebrew/bin/amass
+  register: amass_installed_osx
+
+- name: Install Amass via Homebrew for macOS
+  become: true
+  when: amass_installed_osx.stat.exists == false
+  command: brew install amass
+
+- name: Verify Amass installation
+  command: amass -version
+  register: amass_version
+  failed_when: amass_version.stdout == ""
+  changed_when: false

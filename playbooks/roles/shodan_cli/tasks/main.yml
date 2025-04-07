@@ -1,0 +1,6 @@
+---
+- name: Install Shodan CLI
+  pip:
+    name: shodan
+    state: present
+  tags: shodan_cli

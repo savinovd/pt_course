@@ -1,0 +1,10 @@
+- name: Clone GitDorker repository
+  git:
+    repo: https://github.com/obheda12/GitDorker.git
+    dest: /opt/GitDorker
+    update: no
+
+- name: Install Python requirements for GitDorker
+  pip:
+    requirements: /opt/GitDorker/requirements.txt
+    executable: pip3

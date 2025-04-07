@@ -1,0 +1,63 @@
+- name: Install Go on EC2
+  become: true
+  shell: |
+    GO_VERSION=1.22.2
+    ARCH=amd64
+    OS=linux
+    curl -LO https://golang.org/dl/go${GO_VERSION}.${OS}-${ARCH}.tar.gz
+    rm -rf /usr/local/go
+    tar -C /usr/local -xzf go${GO_VERSION}.${OS}-${ARCH}.tar.gz
+    rm go${GO_VERSION}.${OS}-${ARCH}.tar.gz
+  args:
+    executable: /bin/bash
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Install Go on OSX
+  become: true
+  shell: |
+    GO_VERSION=1.22.2
+    ARCH=amd64
+    OS=darwin
+    curl -LO https://golang.org/dl/go${GO_VERSION}.${OS}-${ARCH}.tar.gz
+    rm -rf /usr/local/go
+    tar -C /usr/local -xzf go${GO_VERSION}.${OS}-${ARCH}.tar.gz
+    rm go${GO_VERSION}.${OS}-${ARCH}.tar.gz
+  when: ansible_facts['os_family'] == "Darwin"
+
+- name: Set Go environment variables
+  set_fact:
+    gopath: "/home/{{ ansible_user }}/go"
+    go_path: "/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+- name: Check Go installation
+  become: true
+  environment:
+    PATH: "{{ go_path }}"
+  shell: go version
+  args:
+    executable: /bin/bash
+
+- name: Install subfinder on Ubuntu
+  become: true
+  become_user: "{{ ansible_user }}"
+  environment:
+    PATH: "{{ go_path }}"
+    GOPATH: "{{ gopath }}"
+  shell: |
+    go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+  args:
+    creates: "{{ gopath }}/bin/subfinder"
+
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Install subfinder on OSX
+  become: true
+  become_user: "{{ ansible_user }}"
+  environment:
+    PATH: "{{ go_path }}"
+    GOPATH: "{{ gopath }}"
+  shell: |
+    go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+  args:
+    creates: "{{ gopath }}/bin/subfinder"
+  when: ansible_facts['os_family'] == "Darwin"

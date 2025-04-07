@@ -1,0 +1,42 @@
+---
+- name: Install pipx and dependencies for EC2 (Ubuntu)
+  when: ansible_facts.os_family == "Debian"
+  become: true
+  apt:
+    name:
+      - pipx
+      - python3.11-venv
+    state: present
+
+- name: Install pipx and dependencies for macOS
+  when: ansible_facts.os_family == "Darwin"
+  become: true
+  homebrew:
+    name:
+      - pipx
+    state: present
+
+- name: Clone theHarvester repository
+  become: true
+  git:
+    repo: https://github.com/laramies/theHarvester.git
+    dest: /opt/theHarvester
+    version: master
+
+- name: Install TheHarvester using pipx for EC2
+  become: true
+  command: pipx install --python python3.11 /opt/theHarvester
+  args:
+    creates: /home/ubuntu/.local/pipx/venvs/theharvester
+
+
+- name: Install TheHarvester using pipx for macOS
+  become: true
+  when: ansible_facts.os_family == "Darwin"
+  command: pipx install --python python3.11 /opt/theHarvester
+  args:
+    creates: /Users/{{ ansible_user }}/.local/pipx/venvs/theharvester
+
+- name: Ensure pipx is in PATH
+  become: true
+  command: pipx ensurepath
